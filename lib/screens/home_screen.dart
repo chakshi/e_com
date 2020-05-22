@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:grindgrain/models/category.dart';
 import 'package:grindgrain/models/product.dart';
+import 'package:grindgrain/services/add_to_cart_services.dart';
 import 'package:grindgrain/services/category_service.dart';
 import 'package:grindgrain/services/product_service.dart';
 import 'dart:convert';
 import 'package:grindgrain/widgets/home_product_categories.dart';
 import 'package:grindgrain/widgets/show_product.dart';
+
+import 'cart_screen.dart';
 
 
 class HomeScreen extends StatefulWidget {
@@ -24,6 +27,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   ProductService _productService=ProductService();
   List<Products> _productList= List<Products>();
+  CartService _cartService = CartService();
+  List<Products> _cartItems;
 
   var items=[];
 @override
@@ -32,7 +37,31 @@ void initState() {
   
   _getAllCategories();
   _getAllProducts();
+   _getCartItems();
 }
+
+
+
+  _getCartItems() async{
+    _cartItems = List<Products>();
+
+    var cartItems = await _cartService.getCartItems();
+    cartItems.forEach((data){
+      var product =Products();
+      product.id = data['productId'];
+      product.name= data['productName'];
+      product.photo = data['productPhoto'];
+      product.price = data['productPrice'];
+      product.discount = data['productDiscount'];
+      product.productDetail= data['productDetail'] ?? 'No detail';
+      product.quantity = data['productQuantity'];
+
+      setState(() {
+        _cartItems.add(product);
+      });
+    });
+  }
+
 
  
 _getAllCategories() async{
@@ -71,34 +100,49 @@ _getAllCategories() async{
          title: Text('Grind Grain'),
          backgroundColor: Colors.brown.shade500,
          actions: <Widget>[
-           Padding(
-             padding: const EdgeInsets.all(10.0),
-             child: Container(height: 150,
-             width: 30,
-             child: Stack(
-              children: <Widget>[
-                 IconButton(
-                 iconSize: 30,
-                 icon: Icon(Icons.shopping_cart, color: Colors.white,),
-                 onPressed: (){},
-               ),
-               Positioned(
-                 child:Stack(
-                   children: <Widget>[
-                 Icon(Icons.brightness_1, size: 25, color:Colors.brown.shade50),
-                 Positioned(
-                   top: 4.0,
-                   right: 8.0,
-                   child: Center(child: Text('0',style: TextStyle(
-                     color: Colors.red
-                   ),)))
-               ],))
-              ],
-               
-             ),
-             ),
-           )
-         ],
+          InkWell(
+            onTap: (){
+              Navigator.push(context, MaterialPageRoute(builder: (context)=>CartScreen(_cartItems)));
+            },
+
+                      child: Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: Container(
+                height: 150,
+                width: 30,
+                child: Stack(
+                  children: <Widget>[
+                    IconButton(
+                      iconSize: 30,
+                      icon: Icon(
+                        Icons.shopping_cart,
+                        color: Colors.white,
+                      ),
+                      onPressed: () {},
+                    ),
+                    Positioned(
+                        child: Stack(
+                      children: <Widget>[
+                        Icon(Icons.brightness_1,
+                            size: 25, color: Colors.brown.shade50),
+                        Positioned(
+                            top: 4.0,
+                            right: 8.0,
+                            child: Center(
+                                child: Text(
+                              _cartItems.length.toString(),
+                              style: TextStyle(
+                                color: Colors.redAccent,
+                              ),
+                            )))
+                      ],
+                    ))
+                  ],
+                ),
+              ),
+            ),
+          )
+        ],
        ),
        body: Container(child: ListView(
          scrollDirection: Axis.vertical,

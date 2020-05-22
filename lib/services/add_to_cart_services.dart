@@ -20,5 +20,14 @@ class CartService{
    getCartItems() async {
     return await _repository.getAllLocal('carts');
   }
+   deleteCartItemById(int id) async {
+     print(id);
+    return await _repository.deleteLocalById('carts', id);
+    
+  }
+
+  makeTheCartEmpty() async {
+    return await _repository.deleteLocal('carts');
+  }
    
 }
