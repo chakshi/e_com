@@ -1,8 +1,11 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:grindgrain/models/payment.dart';
 import 'package:grindgrain/models/product.dart';
-import 'package:grindgrain/models/shipping.dart';
-import 'package:grindgrain/services/shipping_address.dart';
+import 'package:grindgrain/screens/home_screen.dart';
+import 'package:grindgrain/services/payment_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class PaymentScreen extends StatefulWidget {
   final List<Products> cartItems;
@@ -67,68 +70,63 @@ class _PaymentScreenState extends State<PaymentScreen> {
               color: Colors.black,
             ),
             Padding(
-            padding: const EdgeInsets.only(
-                left: 28.0, top: 14.0, right: 28.0, bottom: 14.0),
-            child: TextField(
-              keyboardType: TextInputType.emailAddress,
-              controller: _cardHolderEmail,
-              decoration: InputDecoration(hintText: 'Email'),
-            ),
-          ),
-
-          Padding(
-            padding: const EdgeInsets.only(
-                left: 28.0, top: 14.0, right: 28.0, bottom: 14.0),
-            child: TextField(
-              controller: _cardHolderName,
-              decoration: InputDecoration(hintText: 'Name'),
-            ),
-          ),
-
-          Padding(
-            padding: const EdgeInsets.only(
-                left: 28.0, top: 14.0, right: 28.0, bottom: 14.0),
-            child: TextField(
-              controller: _cardNumber,
-              decoration: InputDecoration(
-                hintText: 'Card Number',
+              padding: const EdgeInsets.only(
+                  left: 28.0, top: 14.0, right: 28.0, bottom: 14.0),
+              child: TextField(
+                keyboardType: TextInputType.emailAddress,
+                controller: _cardHolderEmail,
+                decoration: InputDecoration(hintText: 'Email'),
               ),
             ),
-          ),
-
-          Padding(
-            padding: const EdgeInsets.only(
-                left: 28.0, top: 14.0, right: 28.0, bottom: 14.0),
-            child: TextField(
-              controller: _expiryMonth,
-              decoration: InputDecoration(
-                hintText: 'Expiry Month',
+            Padding(
+              padding: const EdgeInsets.only(
+                  left: 28.0, top: 14.0, right: 28.0, bottom: 14.0),
+              child: TextField(
+                controller: _cardHolderName,
+                decoration: InputDecoration(hintText: 'Name'),
               ),
             ),
-          ),
-
-          Padding(
-            padding: const EdgeInsets.only(
-                left: 28.0, top: 14.0, right: 28.0, bottom: 14.0),
-            child: TextField(
-              controller: _expiryYear,
-              decoration: InputDecoration(
-                hintText: 'Expiry Year',
+            Padding(
+              padding: const EdgeInsets.only(
+                  left: 28.0, top: 14.0, right: 28.0, bottom: 14.0),
+              child: TextField(
+                controller: _cardNumber,
+                decoration: InputDecoration(
+                  hintText: 'Card Number',
+                ),
               ),
             ),
-          ),
-
-          Padding(
-            padding: const EdgeInsets.only(
-                left: 28.0, top: 14.0, right: 28.0, bottom: 14.0),
-            child: TextField(
-              controller: _cvcNumber,
-              obscureText: true,
-              decoration: InputDecoration(
-                hintText: 'CVC',
+            Padding(
+              padding: const EdgeInsets.only(
+                  left: 28.0, top: 14.0, right: 28.0, bottom: 14.0),
+              child: TextField(
+                controller: _expiryMonth,
+                decoration: InputDecoration(
+                  hintText: 'Expiry Month',
+                ),
               ),
             ),
-          ),
+            Padding(
+              padding: const EdgeInsets.only(
+                  left: 28.0, top: 14.0, right: 28.0, bottom: 14.0),
+              child: TextField(
+                controller: _expiryYear,
+                decoration: InputDecoration(
+                  hintText: 'Expiry Year',
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(
+                  left: 28.0, top: 14.0, right: 28.0, bottom: 14.0),
+              child: TextField(
+                controller: _cvcNumber,
+                obscureText: true,
+                decoration: InputDecoration(
+                  hintText: 'CVC',
+                ),
+              ),
+            ),
             Column(
               children: <Widget>[
                 ButtonTheme(
@@ -138,8 +136,20 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(7.0)),
                     color: Colors.redAccent,
-                    onPressed: () {
-                      
+                    onPressed: () async {
+                      SharedPreferences _prefs =
+                          await SharedPreferences.getInstance();
+                      var payment = Payment();
+                      payment.userId = _prefs.getInt('userId');
+                      payment.name = _cardHolderName.text;
+                      payment.email = _cardHolderEmail.text;
+                      payment.cardNumber = _cardNumber.text;
+                      payment.expiryMonth = _expiryMonth.text;
+                      payment.expiryYear = _expiryYear.text;
+                      payment.cvcNumber = _cvcNumber.text;
+                      payment.cartItems = this.widget.cartItems;
+                      print(payment.cartItems[0]);
+                      _makePayment(context, payment);
                     },
                     child: Text('Make Payment',
                         style: TextStyle(color: Colors.white)),
@@ -153,19 +163,46 @@ class _PaymentScreenState extends State<PaymentScreen> {
     );
   }
 
-  void _shipping(BuildContext context, Shipping shipping) async {
-    var _shippingService = ShippingService();
-    var shippingData = await _shippingService.addShipping(shipping);
-    var result = json.decode(shippingData.body);
+  void _makePayment(BuildContext context, Payment payment) async {
+    PaymentService _paymentService = PaymentService();
+    var paymentData = await _paymentService.makePayment(payment);
+    var result = json.decode(paymentData.body);
     if (result['result'] == true) {
-      // Navigator.push(
-      //     context,
-      //     MaterialPageRoute(
-      //         builder: (context) => PaymentScreen(
-      //               cartItems: this.widget.cartItems,
-      //             )));
-    } else {
-      _showSnackMessage(Text('Failed to add shipping', style: TextStyle(color: Colors.red),));
+      _showPaymentSuccessMessage(context);
+      Timer(Duration(seconds: 2), () {
+        Navigator.pop(context);
+        Navigator.push(
+            context, MaterialPageRoute(builder: (context) => HomeScreen()));
+      });
     }
+  }
+
+  _showPaymentSuccessMessage(BuildContext context) {
+    return showDialog(
+        context: context,
+        barrierDismissible: true,
+        builder: (context) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(10.0))),
+            content: Container(
+              height: 360,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Image.asset('assets/success.png'),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      'Order & Payment is successfully done!',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 24.0),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        });
   }
 }

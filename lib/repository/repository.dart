@@ -19,13 +19,17 @@ class Repository {
   httpGet(String api) async {
     return await http.get(_baseUrl + "/" + api);
   }
+
+  httpGetById(String api, id) async {
+    return await http.get(_baseUrl + "/" + api + "/" + id.toString());
+  }
+
+  
 httpPost(String api, data) async {
     return await http.post(_baseUrl + "/" + api, body: data);
   }
 
-httpGetById(String api, id) async {
-    return await http.get(_baseUrl + "/" + api + "/" + id.toString());
-  }
+
   getAllLocal(table) async {
     var conn = await database;
     return await conn.query(table);

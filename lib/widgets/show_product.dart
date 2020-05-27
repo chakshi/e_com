@@ -17,7 +17,7 @@ class _ShowproductState extends State<Showproduct> {
   @override
   Widget build(BuildContext context) {
     return Container(
-       height: 200,
+       height: 1000,
 
       child: GridView.builder(
         scrollDirection: Axis.vertical,

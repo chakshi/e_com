@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:grindgrain/helpers/side_drawer_navigation.dart';
 import 'package:grindgrain/models/category.dart';
 import 'package:grindgrain/models/product.dart';
 import 'package:grindgrain/services/add_to_cart_services.dart';
@@ -35,7 +36,7 @@ class _HomeScreenState extends State<HomeScreen> {
 void initState() { 
   super.initState();
   
-  _getAllCategories();
+  // _getAllCategories();
   _getAllProducts();
    _getCartItems();
 }
@@ -64,19 +65,19 @@ void initState() {
 
 
  
-_getAllCategories() async{
-  var categories= await _categoryService.getCategories();
-  var result= json.decode(categories.body);
-  result['data'].forEach((data){
-    var model= Category();
-    model.id=data['id'];
-    model.name=data['categoryName'];
-    model.icon=data['categoryIcon'];
-    setState(() {
-      _categoryList.add(model);
-    });
-  });
-}
+// _getAllCategories() async{
+//   var categories= await _categoryService.getCategories();
+//   var result= json.decode(categories.body);
+//   result['data'].forEach((data){
+//     var model= Category();
+//     model.id=data['id'];
+//     model.name=data['categoryName'];
+//     model.icon=data['categoryIcon'];
+//     setState(() {
+//       _categoryList.add(model);
+//     });
+//   });
+// }
    _getAllProducts()async{
      var allProducts= await _productService.getProducts();
      var result= json.decode(allProducts.body);
@@ -96,6 +97,7 @@ _getAllCategories() async{
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: SideDrawerNavigation(),
        appBar: AppBar(
          title: Text('Grind Grain'),
          backgroundColor: Colors.brown.shade500,
@@ -148,14 +150,18 @@ _getAllCategories() async{
          scrollDirection: Axis.vertical,
          children: <Widget>[
            Image.asset('images/home2.jpg',),
-           Padding(
-             padding: const EdgeInsets.all(10.0),
-             child: Text('Multi Grain'),
-           ),
-           HomeProductCategories(categoryList:_categoryList),
+          //  Padding(
+          //    padding: const EdgeInsets.all(10.0),
+          //    child: Text('Multi Grain'),
+          //  ),
+          //  HomeProductCategories(categoryList:_categoryList),
             Padding(
              padding: const EdgeInsets.all(10.0),
-             child: Text('Our products'),
+             child: Center(child: Text('Our Products', style: TextStyle(
+               color: Colors.brown.shade800,
+               fontSize: 25,
+               fontWeight: FontWeight.bold
+             ),)),
            ),
            Showproduct(productList:_productList)
          ],

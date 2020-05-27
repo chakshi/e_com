@@ -1,10 +1,9 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:grindgrain/models/product.dart';
 import 'package:grindgrain/models/shipping.dart';
 import 'package:grindgrain/screens/payment_screen.dart';
-import 'package:grindgrain/services/shipping_address.dart';
+import 'package:grindgrain/services/shipping_service.dart';
 
 class CheckoutScreen extends StatefulWidget {
   final List<Products> cartItems;
@@ -21,8 +20,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
   final email = TextEditingController();
 
+  final phone = TextEditingController();
+
   final address = TextEditingController();
- 
 
   _showSnackMessage(message) {
     var snackBar = SnackBar(
@@ -92,13 +92,23 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               padding: const EdgeInsets.only(
                   left: 28.0, top: 14.0, right: 28.0, bottom: 14.0),
               child: TextField(
+                keyboardType: TextInputType.phone,
+                controller: phone,
+                decoration: InputDecoration(
+                    hintText: 'Enter your phone number',
+                    labelText: 'Enter your phone number'),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(
+                  left: 28.0, top: 14.0, right: 28.0, bottom: 14.0),
+              child: TextField(
                 controller: address,
                 maxLines: 3,
                 decoration:
                     InputDecoration(hintText: 'Address', labelText: 'Address'),
               ),
             ),
-            
             Column(
               children: <Widget>[
                 ButtonTheme(
@@ -112,13 +122,13 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       var shipping = Shipping();
                       shipping.name = name.text;
                       shipping.email = email.text;
+                      shipping.phone = phone.text;
                       shipping.address = address.text;
-                     
                       _shipping(context, shipping);
                     },
                     child: Text('Continue to Payment',
                         style: TextStyle(color: Colors.white)),
-                  ),
+                 ),
                 ),
               ],
             ),
@@ -131,10 +141,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   void _shipping(BuildContext context, Shipping shipping) async {
     var _shippingService = ShippingService();
     var shippingData = await _shippingService.addShipping(shipping);
-    print(shippingData);
     var result = json.decode(shippingData.body);
     if (result['result'] == true) {
-      print('Reached to payment screen');
       Navigator.push(
           context,
           MaterialPageRoute(

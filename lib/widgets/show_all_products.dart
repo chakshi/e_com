@@ -21,13 +21,24 @@ class _ShowAllProdutsState extends State<ShowAllProduts> {
            Navigator.push(context, MaterialPageRoute(builder: (context)=> ProductDetail(this.widget.products)));
          },
                 child: Card(child: Column(children: <Widget>[
-           Text(widget.products.name),
+           Text(widget.products.name, style: TextStyle(fontWeight: FontWeight.bold,
+           fontSize: 18
+           ),),
            Image.network(widget.products.photo,width:190.0, height:140.0),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: <Widget>[
-              Text(widget.products.price.toString()),
-              Text(widget.products.discount.toString()),
+              Text('₹${widget.products.price.toString()}', 
+              style: TextStyle(color: Colors.redAccent,
+              fontSize: 16
+              ),
+              
+              ),
+              Text('Discount ${widget.products.discount.toString()}%', 
+              style: TextStyle(
+                color: Colors.green
+              ),
+              ),
           ],)
          ],),),
        ),

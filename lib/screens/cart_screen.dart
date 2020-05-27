@@ -79,7 +79,7 @@ class _CartScreenState extends State<CartScreen> {
         itemCount: this.widget.cartItems.length,
         itemBuilder: (context, index) {
           return Dismissible(
-            key: Key(this.widget.cartItems[index].id.toString()),
+            key: Key(this.widget.cartItems[index].name),
             onDismissed: (param) {
               _deleteCartItem(index, this.widget.cartItems[index].id);
             },
@@ -95,7 +95,7 @@ class _CartScreenState extends State<CartScreen> {
                 subtitle: Row(
                   children: <Widget>[
                     Text(
-                      '\$${this.widget.cartItems[index].price - this.widget.cartItems[index].discount}',
+                      '₹${this.widget.cartItems[index].price - this.widget.cartItems[index].discount}',
                       style:
                           TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
                     ),
@@ -115,7 +115,7 @@ class _CartScreenState extends State<CartScreen> {
                           TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
                     ),
                     Text(
-                      '\$${(this.widget.cartItems[index].price - this.widget.cartItems[index].discount) * this.widget.cartItems[index].quantity}',
+                      '₹${(this.widget.cartItems[index].price - this.widget.cartItems[index].discount) * this.widget.cartItems[index].quantity}',
                       style:
                           TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
                     )
@@ -169,7 +169,7 @@ class _CartScreenState extends State<CartScreen> {
             children: <Widget>[
               Expanded(
                 child: Text(
-                  'Total : \$$_total',
+                  'Total : ₹$_total',
                   style: TextStyle(
                       fontWeight: FontWeight.bold, color: Colors.redAccent),
                 ),
@@ -200,13 +200,15 @@ class _CartScreenState extends State<CartScreen> {
     });
 
     // delete item by id from local database
-    var result = await _cartService.deleteCartItemById(id);
+   var result = await _cartService.makeTheCartEmpty();
     if (result > 0) {
+      
       _showSnackMessage(Text(
         'One item deleted from cart',
         style: TextStyle(color: Colors.red),
       ));
     } else {
+      print(result);
       _showSnackMessage(Text(
         'Cart items can not be deleted!',
         style: TextStyle(color: Colors.yellow),
